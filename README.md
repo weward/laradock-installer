@@ -1,6 +1,7 @@
 # My Laradock 
 
-Installer script for automating [Laradock](https://github.com/Laradock/laradock) installation.
+Installer script for automating [Laradock](https://github.com/Laradock/laradock) installation. 
+- This installs Laradock v16.0.
 
 
 
@@ -14,6 +15,7 @@ Installer script for automating [Laradock](https://github.com/Laradock/laradock)
 ## Installation
 
 1. Copy the `.sh` files in the root of your Laravel application.
+
     - `installer.sh`
     - `init-laravel-app.sh`
 
@@ -29,13 +31,13 @@ sh installer.sh
 
 ```bash
 
-chmod -R 777 /storage
+chmod -R 777 .  /storage
 
 ```
 
 
 
-### Notes
+## Notes
 
 The installer executes 2 files:
 
