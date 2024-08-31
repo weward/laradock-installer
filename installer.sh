@@ -26,11 +26,13 @@
 
 # Defaultalues
 php_version="8.3"
+echo "Setting php_version to $php_version"
 
 
 
 # /home/ubuntu/Dev-wsl/code/<app_name>
 app_path=$(pwd) 
+
 echo "Current DIR: $app_path\n"
 
 
@@ -43,20 +45,28 @@ else
     app_name=$(basename $app_path)
 fi
 
+echo "app_name: $app_name"
 
 
-# Transform to kebab case
-site_name="$app_name" | sed 's/ /-/g'
+
+# # Transform to kebab case
+site_name=$(echo "$app_name" | sed 's/ /-/g')
+
+echo "site_name: $site_name"
 
 
 
 # Install Laradock inside a web-app
 laradock_name="laradock-$site_name"
 
+echo "laradock_name: $laradock_name"
+
 
 
 # Set Laradock Directory Path (Inside the Laravel App)
 laradock_path="$app_path/$laradock_name"
+
+echo "laradock_path: $laradock_path"
 
 
 
@@ -200,7 +210,7 @@ if [ -f "$app_path/.env" ]; then
     create_database_sql_content='CREATE DATABASE IF NOT EXISTS `laravel` COLLATE 'utf8mb4_unicode_ci';\nGRANT ALL ON `laravel`.* TO 'default'@'%';\nFLUSH PRIVILEGES;'
 
     # Create Database - SQL file
-    echo -e "$create_database_sql_content" > "$laradock_path/mysql/docker-entrypoint-initdb.d/createdb.sql"
+    echo "$create_database_sql_content" > "$laradock_path/mysql/docker-entrypoint-initdb.d/createdb.sql"
 
     echo "Created new file: createdb.sql in $laradock_path/mysql/docker-entrypoint-initdb.d/ for database creation!\n"
 
@@ -218,6 +228,19 @@ if [ -f "$app_path/.env" ]; then
     sed -i "s#DB_DATABASE=.*#DB_DATABASE=laravel#" $app_path/.env.example
     sed -i "s#DB_USERNAME=.*#DB_USERNAME=root#" $app_path/.env.example
     sed -i "s#DB_PASSWORD=.*#DB_PASSWORD=root#" $app_path/.env.example
+    
+    # Remove # if commented
+    sed -i '/#DB_CONNECTION/s/^#//' $app_path/.env
+    sed -i '/#DB_HOST/s/^#//' $app_path/.env
+    sed -i '/#DB_DATABASE/s/^#//' $app_path/.env
+    sed -i '/#DB_USERNAME/s/^#//' $app_path/.env
+    sed -i '/#DB_PASSWORD/s/^#//' $app_path/.env
+
+    sed -i '/#DB_CONNECTION/s/^#//' $app_path/.env.example
+    sed -i '/#DB_HOST/s/^#//' $app_path/.env.example
+    sed -i '/#DB_DATABASE/s/^#//' $app_path/.env.example
+    sed -i '/#DB_USERNAME/s/^#//' $app_path/.env.example
+    sed -i '/#DB_PASSWORD/s/^#//' $app_path/.env.example
 
     echo "Done updating DB_ vars in parent ($app_path/.env)!\n"
 else 
@@ -344,7 +367,7 @@ fi
 
 if [ -f "$app_path/.env" ]; then
     # Back to Laravel App
-    # cd ..
+
     echo "Updating MAIL_ .env vars in parent ($app_name/.env) for Mailpit!\n"
 
     sed -i "s#MAIL_MAILER=.*#MAIL_MAILER=smtp#" $app_path/.env
@@ -449,12 +472,19 @@ echo "Done!\n"
 
 if [ -f "$laradock_path/docker-compose.yml" ]; then
     echo "Updating network names in $laradock_path/docker-compose.yml\n"
-    # Set network names
-    sed -i "s/^\s*backend.*:/  backend${app_name}:/" "$laradock_path/docker-compose.yml"
-    sed -i "s/^\s*frontend.*:/  frontend${app_name}:/" "$laradock_path/docker-compose.yml"
-    # Change network names in each services
-    sed -i -E "s/^\s*- backend.*$/        - backend${app_name}/g" "$laradock_path/docker-compose.yml"
-    sed -i -E "s/^\s*- frontend.*$/        - frontend${app_name}/g" "$laradock_path/docker-compose.yml"
+    # # Set network names
+    # sed -i "s/^\s*backend.*:/  backend${app_name}:/" "$laradock_path/docker-compose.yml"
+    # sed -i "s/^\s*frontend.*:/  frontend${app_name}:/" "$laradock_path/docker-compose.yml"
+    # # Change network names in each services
+    # sed -i -E "s/^\s*- backend.*$/        - backend${app_name}/g" "$laradock_path/docker-compose.yml"
+    # sed -i -E "s/^\s*- frontend.*$/        - frontend${app_name}/g" "$laradock_path/docker-compose.yml"
+
+    # replace [any_spaces]backend[any_chars][colon] with "backend$app_name"
+    sed -i -E 's/^([[:space:]]*)backend(\s*|-|.*)/\1backend-'"$app_name":'/g' "$laradock_path/docker-compose.yml"
+    sed -i -E 's/^([[:space:]]*)backend(\s*|-|.*)/\1backend-'"$app_name":'/g' "$laradock_path/docker-compose.yml"
+    # Replace line: [any_spaces]backend[any_chars] with "- backend$app_name"
+    sed -i -E 's/^([[:space:]]*)- backend(\s*|-|.*)/\1- backend-'"$app_name"'/g' "$laradock_path/docker-compose.yml"
+    sed -i -E 's/^([[:space:]]*)- backend(\s*|-|.*)/\1- backend-'"$app_name"'/g' "$laradock_path/docker-compose.yml"
 
     echo "Done!\n"
 else
@@ -620,7 +650,10 @@ fi
 export app_path 
 export site_name
 
-cd "$app_path/laradock-$site_name"
+echo "init-laravel-app.sh inside"
+
+echo "$app_path/laradock-$site_name"
+
 sh ./init-laravel-app.sh
 
 
@@ -633,9 +666,9 @@ sh ./init-laravel-app.sh
 # ===================================================
 
 # Remove install scripts 
-rm ./installer.sh
+# rm ./installer.sh
 
-rm ./init-laravel-app.sh
+# rm ./init-laravel-app.sh
 
 
 

@@ -5,6 +5,9 @@
 # ==================
 # Composer Install
 # ==================
+cd "$app_path/laradock-$site_name"
+
+echo "Executing init-laravel-app.sh inside $(pwd)"
 
 echo "Installing composer packages..."
 
